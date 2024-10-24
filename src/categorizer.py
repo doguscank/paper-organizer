@@ -3,6 +3,8 @@ import json
 from arxiv_paper import get_arxiv_papers_with_id, ArxivPaper
 from typing import Optional
 
+MAX_SUB_CATEGORIES = 20
+
 
 def get_categories_and_subcategories(
     summary: str,
@@ -47,7 +49,7 @@ def get_categories_and_subcategories(
 
     result = json.loads(completion.choices[0].message.content)
 
-    return result["category"], result["sub_categories"]
+    return result["category"], result["sub_categories"][:MAX_SUB_CATEGORIES]
 
 
 def get_categorized_papers(paper_ids: list[str]) -> list[ArxivPaper]:
