@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import sqlite3
 from pathlib import Path
 from typing import List, Optional, Tuple, Union
