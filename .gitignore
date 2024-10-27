@@ -9,6 +9,11 @@ __pycache__/
 # Env file
 *.env
 
+# Database files
+*.sqlite3
+*.db
+*.faiss
+
 # Distribution / packaging
 .Python
 build/

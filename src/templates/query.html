@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>Query Papers</h1>
+<form method="post" action="/query">
+    <div class="form-group">
+        <label for="query_text">Query Text</label>
+        <input type="text" class="form-control" id="query_text" name="query_text" required>
+    </div>
+    <div class="form-group">
+        <label for="k">Number of Results</label>
+        <input type="number" class="form-control" id="k" name="k" value="3">
+    </div>
+    <div class="form-group">
+        <label for="min_similarity">Minimum Similarity</label>
+        <input type="number" step="0.01" class="form-control" id="min_similarity" name="min_similarity" value="0.6">
+    </div>
+    <button type="submit" class="btn btn-primary">Query</button>
+</form>
+
+{% if results %}
+<h2>Query Results For "{{ query_text }}"</h2>
+<div class="row">
+    {% for paper in results %}
+    <div class="col-md-4">
+        <div class="card mb-4">
+            <div class="card-body">
+                <h5 class="card-title">{{ paper.title }}</h5>
+                <h6 class="card-subtitle mb-2 text-muted">
+                    {% for author in paper.authors %}
+                    <span class="badge badge-secondary">{{ author }}</span>
+                    {% endfor %}
+                </h6>
+                <p class="card-text">{{ paper.summary }}</p>
+                <p class="card-text"><strong>Category:</strong> {{ paper.category }}</p>
+                <p class="card-text"><strong>Sub Categories:</strong>
+                    {% for sub_category in paper.sub_categories %}
+                    <span class="badge badge-info rounded-pill">{{ sub_category }}</span>
+                    {% endfor %}
+                </p>
+                <a href="{{ paper.url }}" class="card-link" target="_blank">Read more</a>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+{% endblock %}

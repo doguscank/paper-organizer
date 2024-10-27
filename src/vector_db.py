@@ -20,6 +20,7 @@ class VectorDB:
     def __init__(
         self,
         dim: int,
+        conn: Optional[sqlite3.Connection] = None,
         db_path: str = DEFAULT_DB_PATH,
         index_path: Path = DEFAULT_INDEX_PATH,
     ) -> None:
@@ -30,6 +31,8 @@ class VectorDB:
         ----------
         dim : int
             The dimension of the vectors.
+        conn : Optional[sqlite3.Connection], optional
+            An existing SQLite connection to use.
         db_path : str, optional
             Path to the SQLite database.
         index_path : Path, optional
@@ -42,7 +45,7 @@ class VectorDB:
         self.db_path = db_path
 
         # Create or connect to the SQLite database for storing metadata
-        self.conn = sqlite3.connect(db_path)
+        self.conn = conn or sqlite3.connect("papers.db", check_same_thread=False)
         self._create_tables()
 
         # Load the FAISS index if it exists

@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>View Papers</h1>
+<div class="row">
+    {% for paper in papers %}
+    <div class="col-md-4">
+        <div class="card mb-4">
+            <div class="card-body">
+                <h5 class="card-title">{{ paper.title }}</h5>
+                <h6 class="card-subtitle mb-2 text-muted">{{ paper.authors }}</h6>
+                <p class="card-text">{{ paper.summary }}</p>
+                <p class="card-text"><strong>Category:</strong> {{ paper.category }}</p>
+                <p class="card-text"><strong>Sub Categories:</strong> {{ paper.sub_categories }}</p>
+                <a href="{{ paper.url }}" class="card-link" target="_blank">Read more</a>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

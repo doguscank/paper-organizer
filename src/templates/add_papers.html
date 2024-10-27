@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>Add Papers</h1>
+<form method="post" action="/add_papers">
+    <div class="form-group">
+        <label for="arxiv_ids">ArXiv IDs (comma-separated)</label>
+        <input type="text" class="form-control" id="arxiv_ids" name="arxiv_ids" required>
+    </div>
+    <button type="submit" class="btn btn-primary">Add Papers</button>
+</form>
+{% endblock %}
