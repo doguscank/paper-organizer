@@ -1,5 +1,6 @@
-from transformers import AutoModel, AutoTokenizer
+# -*- coding: utf-8 -*-
 import numpy as np
+from transformers import AutoModel, AutoTokenizer
 
 TOKENIZER = AutoTokenizer.from_pretrained("allenai/scibert_scivocab_uncased")
 MODEL = AutoModel.from_pretrained("allenai/scibert_scivocab_uncased")
@@ -57,7 +58,7 @@ def generate_embedding(text: str) -> np.ndarray:
     model = get_model()
     tokenizer = get_tokenizer()
 
-    inputs = tokenizer(text.lower(), return_tensors="pt", padding=True, truncation=True)
+    inputs = tokenizer(text.lower(), return_tensors="pt")
     outputs = model(**inputs)
     embeddings = outputs.last_hidden_state.mean(dim=1).detach().numpy()
 
@@ -85,9 +86,7 @@ def generate_embeddings(texts: list[str]) -> dict[str, np.ndarray]:
     embeddings = {}
 
     for text in texts:
-        inputs = tokenizer(
-            text.lower(), return_tensors="pt", padding=True, truncation=True
-        )
+        inputs = tokenizer(text.lower(), return_tensors="pt")
         outputs = model(**inputs)
         embedding = outputs.last_hidden_state.mean(dim=1).detach().numpy()
         embeddings[text] = embedding

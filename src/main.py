@@ -1,10 +1,11 @@
-from dotenv import load_dotenv
-from categorizer import get_categorized_papers
-from arxiv_paper import ArxivPaper
-from vector_db import VectorDB
-from embedding_generator import generate_embedding
-
+# -*- coding: utf-8 -*-
 import os
+
+from dotenv import load_dotenv
+
+from categorizer import get_categorized_papers_from_ids
+from embedding_generator import generate_embedding
+from vector_db import VectorDB
 
 os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
 
@@ -15,11 +16,11 @@ if __name__ == "__main__":
 
     db = VectorDB(dim=768)
 
-    papers = get_categorized_papers(arxiv_ids)
+    papers = get_categorized_papers_from_ids(arxiv_ids)
 
     db.add_data(papers)
 
-    query_embeddings = generate_embedding("Diffusion Models")
-    result_papers = db.query(query_vector=query_embeddings, k=60)
+    query_embeddings = generate_embedding("image gen")
+    result_papers = db.query(query_vector=query_embeddings, k=3, min_similarity=0.6)
 
     print([x.title for x in result_papers])
