@@ -296,6 +296,39 @@ class VectorDB:
             is_favorite=row[7],
         )
 
+    def get_paper_by_url(self, url: str) -> ArxivPaper:
+        """
+        Get a paper by its URL.
+
+        Parameters
+        ----------
+        url : str
+            The URL of the paper.
+
+        Returns
+        -------
+        ArxivPaper
+            The paper with the given URL.
+        """
+
+        cursor = self.conn.cursor()
+        cursor.execute("SELECT * FROM papers WHERE url=?", (url,))
+        row = cursor.fetchone()
+
+        if row is None:
+            return None
+
+        return ArxivPaper(
+            id=row[0],
+            title=row[1],
+            authors=row[2].split(","),
+            url=row[3],
+            summary=row[4],
+            category=row[5],
+            sub_categories=row[6].split(","),
+            is_favorite=row[7],
+        )
+
     def get_all_papers(self) -> List[ArxivPaper]:
         """
         Get all papers stored in the database.

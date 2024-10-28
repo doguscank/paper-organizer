@@ -111,5 +111,14 @@ def unfavorite(paper_id):
     return jsonify({"status": "success"})
 
 
+@app.route("/view_paper/<int:paper_id>")
+def view_paper(paper_id):
+    db = get_db()
+    paper = db.get_paper_by_id(paper_id)
+    if paper:
+        return render_template("view_paper.html", paper=paper)
+    return jsonify({"error": "Paper not found"}), 404
+
+
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)
