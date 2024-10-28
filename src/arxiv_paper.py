@@ -1,5 +1,7 @@
-from pydantic import BaseModel
+from typing import Optional
+
 import arxiv
+from pydantic import BaseModel
 
 
 class ArxivPaper(BaseModel):
@@ -8,6 +10,8 @@ class ArxivPaper(BaseModel):
 
     Attributes
     ----------
+    id : Optional[int]
+        The ID of the paper.
     title : str
         The title of the paper.
     authors : list[str]
@@ -20,14 +24,18 @@ class ArxivPaper(BaseModel):
         The category of the paper.
     sub_categories : list[str]
         The sub-categories of the paper.
+    is_favorite : bool
+        A flag indicating whether the paper is a favorite or not.
     """
 
+    id: Optional[int] = None
     title: str
     authors: list[str]
     url: str
     summary: str
     category: str
     sub_categories: list[str]
+    is_favorite: bool = False
 
 
 def get_arxiv_papers_with_id(ids: list[str]) -> list[ArxivPaper]:

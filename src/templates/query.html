@@ -5,7 +5,8 @@
 <form method="post" action="/query">
     <div class="form-group">
         <label for="query_text">Query Text</label>
-        <input type="text" class="form-control" id="query_text" name="query_text" required>
+        <input type="text" class="form-control" id="query_text"
+            name="query_text" required>
     </div>
     <div class="form-group">
         <label for="k">Number of Results</label>
@@ -13,36 +14,60 @@
     </div>
     <div class="form-group">
         <label for="min_similarity">Minimum Similarity</label>
-        <input type="number" step="0.01" class="form-control" id="min_similarity" name="min_similarity" value="0.6">
+        <input type="number" step="0.01" class="form-control"
+            id="min_similarity" name="min_similarity" value="0.6">
     </div>
     <button type="submit" class="btn btn-primary">Query</button>
 </form>
 
 {% if results %}
-<h2>Query Results For "{{ query_text }}"</h2>
+<h2>Results</h2>
 <div class="row">
-    {% for paper in results %}
+    {% for result in results %}
     <div class="col-md-4">
-        <div class="card mb-4">
+        <div class="card mb-4 position-relative">
             <div class="card-body">
-                <h5 class="card-title">{{ paper.title }}</h5>
+                <h5 class="card-title">{{ result.title }}</h5>
                 <h6 class="card-subtitle mb-2 text-muted">
-                    {% for author in paper.authors %}
+                    {% for author in result.authors %}
                     <span class="badge badge-secondary">{{ author }}</span>
                     {% endfor %}
                 </h6>
-                <p class="card-text">{{ paper.summary }}</p>
-                <p class="card-text"><strong>Category:</strong> {{ paper.category }}</p>
+                <p class="card-text">{{ result.summary }}</p>
+                <p class="card-text"><strong>Category:</strong> {{
+                    result.category }}</p>
                 <p class="card-text"><strong>Sub Categories:</strong>
-                    {% for sub_category in paper.sub_categories %}
-                    <span class="badge badge-info rounded-pill">{{ sub_category }}</span>
+                    {% for sub_category in result.sub_categories %}
+                    <span class="badge badge-info rounded-pill">{{ sub_category
+                        }}</span>
                     {% endfor %}
                 </p>
-                <a href="{{ paper.url }}" class="card-link" target="_blank">Read more</a>
+                <a href="{{ result.url }}" class="card-link"
+                    target="_blank">Read more</a>
+                <span
+                    class="favorite-icon {% if result.is_favorite %}favorited{% endif %}"
+                    data-paper-id="{{ result.id }}">&#9733;</span>
             </div>
         </div>
     </div>
     {% endfor %}
 </div>
 {% endif %}
+
+<script>
+    $(document).ready(function() {
+        $(".favorite-icon").click(function() {
+            var paperId = $(this).data("paper-id");
+            var isFavorited = $(this).hasClass("favorited");
+            var url = isFavorited ? "/unfavorite/" + paperId : "/favorite/" + paperId;
+            var icon = $(this);
+
+            $.post(url, function(data) {
+                if (data.status === "success") {
+                    icon.toggleClass("favorited");
+                }
+            });
+        });
+    });
+</script>
 {% endblock %}

@@ -1,32 +1,37 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Paper Organizer</title>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-</head>
-<body>
-    <nav class="navbar navbar-expand-lg navbar-light bg-light">
-        <a class="navbar-brand" href="/">Paper Organizer</a>
-        <div class="collapse navbar-collapse">
-            <ul class="navbar-nav mr-auto">
-                <li class="nav-item">
-                    <a class="nav-link" href="/">Home</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="/add_papers">Add Papers</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="/query">Query</a>
-                </li>
-            </ul>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Paper Organizer</title>
+        <link rel="stylesheet"
+            href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+        <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    </head>
+    <body>
+        <nav class="navbar navbar-expand-lg navbar-light bg-light">
+            <a class="navbar-brand" href="/">Paper Organizer</a>
+            <div class="collapse navbar-collapse">
+                <ul class="navbar-nav mr-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/add_papers">Add Papers</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/query">Query</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/favorites">Favorites</a>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+        <div class="container mt-4">
+            {% block content %}{% endblock %}
         </div>
-    </nav>
-    <div class="container mt-4">
-        {% block content %}{% endblock %}
-    </div>
-</body>
+    </body>
 </html>
 <style>
     .badge-info {
@@ -36,5 +41,18 @@
     .badge-secondary {
         background-color: #6c757d;
         color: white;
+    }
+    .favorite-icon {
+        cursor: pointer;
+        font-size: 1.5rem;
+        position: absolute;
+        top: 10px;
+        right: 10px;
+    }
+    .favorite-icon.favorited {
+        color: orange;
+    }
+    .card {
+        position: relative;
     }
 </style>

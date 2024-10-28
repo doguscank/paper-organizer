@@ -2,11 +2,51 @@
 
 {% block content %}
 <h1>Add Papers</h1>
-<form method="post" action="/add_papers">
+<form id="add-papers-form" method="post" action="/add_papers">
     <div class="form-group">
-        <label for="arxiv_ids">ArXiv IDs (comma-separated)</label>
-        <input type="text" class="form-control" id="arxiv_ids" name="arxiv_ids" required>
+        <label for="paper_ids">Enter Paper IDs or URLs (comma-separated)</label>
+        <input type="text" class="form-control" id="paper_ids" name="paper_ids"
+            required>
     </div>
-    <button type="submit" class="btn btn-primary">Add Papers</button>
+    <button type="submit" class="btn btn-success">Add Papers</button>
 </form>
+
+<div class="mt-4" id="papers-container"></div>
+
+<script>
+    document.getElementById('paper_ids').addEventListener('input', function() {
+        const input = document.getElementById('paper_ids').value;
+        console.log("Input:", input);
+        const ids = input.split(',').map(id => id.trim()).filter(id => id);
+        console.log("Extracted IDs:", ids);
+        const container = document.getElementById('papers-container');
+        const form = document.getElementById('add-papers-form');
+        container.innerHTML = ''; // Clear existing cards
+
+        ids.forEach(id => {
+            const paperId = extractId(id);
+            console.log("Extracted Paper ID:", paperId);
+            if (paperId) {
+                const card = document.createElement('div');
+                card.className = 'card mb-2';
+                card.innerHTML = `
+                    <div class="card-body">
+                        <h5 class="card-title">${paperId}</h5>
+                        <input type="hidden" name="paper_ids" value="${paperId}">
+                    </div>
+                `;
+                container.appendChild(card);
+                form.appendChild(card.querySelector('input'));
+            }
+        });
+    });
+
+    function extractId(input) {
+        const arxivPattern = /arxiv\.org\/abs\/(\d+\.\d+)/;
+        const huggingFacePattern = /huggingface\.co\/papers\/(\d+\.\d+)/;
+        const idPattern = /^\d+\.\d+$/;
+        let match = input.match(arxivPattern) || input.match(huggingFacePattern) || input.match(idPattern);
+        return match ? match[1] || match[0] : null;
+    }
+</script>
 {% endblock %}

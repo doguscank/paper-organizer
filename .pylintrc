@@ -12,7 +12,8 @@ disable=
     too-many-instance-attributes,
     too-many-locals,
     line-too-long,
-    too-many-positional-arguments
+    too-many-positional-arguments,
+    logging-fstring-interpolation
 
 [FORMAT]
 max-line-length=88

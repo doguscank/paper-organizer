@@ -45,7 +45,7 @@ class VectorDB:
         self.db_path = db_path
 
         # Create or connect to the SQLite database for storing metadata
-        self.conn = conn or sqlite3.connect("papers.db", check_same_thread=False)
+        self.conn = conn or sqlite3.connect("arxiv_papers.db", check_same_thread=False)
         self._create_tables()
 
         # Load the FAISS index if it exists
@@ -66,10 +66,12 @@ class VectorDB:
                 url TEXT,
                 summary TEXT,
                 category TEXT,
-                sub_categories TEXT
+                sub_categories TEXT,
+                is_favorite INTEGER DEFAULT 0
             )
-        """
+            """
         )
+
         self.conn.commit()
 
     def check_if_paper_exists(self, paper: ArxivPaper) -> bool:
@@ -113,8 +115,8 @@ class VectorDB:
             # Insert the paper's metadata into the SQLite database
             cursor.execute(
                 """
-                INSERT INTO papers (title, authors, url, summary, category, sub_categories)
-                VALUES (?, ?, ?, ?, ?, ?)
+                INSERT INTO papers (title, authors, url, summary, category, sub_categories, is_favorite)
+                VALUES (?, ?, ?, ?, ?, ?, ?)
             """,
                 (
                     paper.title,
@@ -127,6 +129,7 @@ class VectorDB:
                     ",".join(
                         paper.sub_categories
                     ),  # Store sub-categories as a comma-separated string
+                    paper.is_favorite,
                 ),
             )
 
@@ -244,12 +247,14 @@ class VectorDB:
         # Convert the SQL results into ArxivPaper objects
         results = [
             ArxivPaper(
+                id=row[0],
                 title=row[1],
                 authors=row[2].split(","),
                 url=row[3],
                 summary=row[4],
                 category=row[5],
                 sub_categories=row[6].split(","),
+                is_favorite=row[7],
             )
             for row in rows
         ]
@@ -281,12 +286,14 @@ class VectorDB:
             return None
 
         return ArxivPaper(
+            id=row[0],
             title=row[1],
             authors=row[2].split(","),
             url=row[3],
             summary=row[4],
             category=row[5],
             sub_categories=row[6].split(","),
+            is_favorite=row[7],
         )
 
     def get_all_papers(self) -> List[ArxivPaper]:
@@ -305,12 +312,14 @@ class VectorDB:
 
         return [
             ArxivPaper(
+                id=row[0],
                 title=row[1],
                 authors=row[2].split(","),
                 url=row[3],
                 summary=row[4],
                 category=row[5],
                 sub_categories=row[6].split(","),
+                is_favorite=row[7],
             )
             for row in rows
         ]
@@ -338,12 +347,14 @@ class VectorDB:
             return None
 
         return ArxivPaper(
+            id=row[0],
             title=row[1],
             authors=row[2].split(","),
             url=row[3],
             summary=row[4],
             category=row[5],
             sub_categories=row[6].split(","),
+            is_favorite=row[7],
         )
 
     def get_all_titles(self) -> List[str]:
@@ -422,12 +433,14 @@ class VectorDB:
 
         return [
             ArxivPaper(
+                id=row[0],
                 title=row[1],
                 authors=row[2].split(","),
                 url=row[3],
                 summary=row[4],
                 category=row[5],
                 sub_categories=row[6].split(","),
+                is_favorite=row[7],
             )
             for row in rows
         ]
@@ -456,12 +469,99 @@ class VectorDB:
 
         return [
             ArxivPaper(
+                id=row[0],
                 title=row[1],
                 authors=row[2].split(","),
                 url=row[3],
                 summary=row[4],
                 category=row[5],
                 sub_categories=row[6].split(","),
+                is_favorite=row[7],
             )
             for row in rows
         ]
+
+    def get_favorite_papers(self) -> List[ArxivPaper]:
+        """
+        Get all favorite papers.
+
+        Returns
+        -------
+        List[ArxivPaper]
+            A list of all favorite papers in the database.
+        """
+
+        cursor = self.conn.cursor()
+        cursor.execute("SELECT * FROM papers WHERE is_favorite = 1")
+        rows = cursor.fetchall()
+        papers = []
+        for row in rows:
+            paper = ArxivPaper(
+                id=row[0],
+                title=row[1],
+                authors=row[2].split(","),
+                url=row[3],
+                summary=row[4],
+                category=row[5],
+                sub_categories=row[6].split(","),
+                is_favorite=bool(row[7]),
+            )
+            papers.append(paper)
+        return papers
+
+    def add_favorite(self, paper_id: int) -> None:
+        """
+        Add a paper to the favorites.
+
+        Parameters
+        ----------
+        paper_id : int
+            The ID of the paper to add to favorites.
+
+        Returns
+        -------
+        None
+        """
+
+        cursor = self.conn.cursor()
+        cursor.execute("UPDATE papers SET is_favorite = 1 WHERE id = ?", (paper_id,))
+        self.conn.commit()
+
+    def remove_favorite(self, paper_id: int) -> None:
+        """
+        Remove a paper from the favorites.
+
+        Parameters
+        ----------
+        paper_id : int
+            The ID of the paper to remove from favorites.
+
+        Returns
+        -------
+        None
+        """
+
+        cursor = self.conn.cursor()
+        cursor.execute("UPDATE papers SET is_favorite = 0 WHERE id = ?", (paper_id,))
+        self.conn.commit()
+
+    def is_favorite(self, paper_id: int) -> bool:
+        """
+        Check if a paper is in the favorites.
+
+        Parameters
+        ----------
+        paper_id : int
+            The ID of the paper to check.
+
+        Returns
+        -------
+        bool
+            True if the paper is in the favorites, False otherwise.
+        """
+
+        cursor = self.conn.cursor()
+        cursor.execute(
+            "SELECT 1 FROM papers WHERE id = ? AND is_favorite = 1", (paper_id,)
+        )
+        return cursor.fetchone() is not None

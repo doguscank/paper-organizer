@@ -1,10 +1,10 @@
 {% extends "base.html" %}
 {% block content %}
-<h1>View Papers</h1>
+<h1>Favorite Papers</h1>
 <div class="row">
     {% for paper in papers %}
     <div class="col-md-4">
-        <div class="card mb-4 position-relative">
+        <div class="card mb-4">
             <div class="card-body">
                 <h5 class="card-title">{{ paper.title }}</h5>
                 <h6 class="card-subtitle mb-2 text-muted">
@@ -13,19 +13,14 @@
                     {% endfor %}
                 </h6>
                 <p class="card-text">{{ paper.summary }}</p>
-                <p class="card-text"><strong>Category:</strong> {{
-                    paper.category }}</p>
+                <p class="card-text"><strong>Category:</strong> {{ paper.category }}</p>
                 <p class="card-text"><strong>Sub Categories:</strong>
                     {% for sub_category in paper.sub_categories %}
-                    <span class="badge badge-info rounded-pill">{{ sub_category
-                        }}</span>
+                    <span class="badge badge-info rounded-pill">{{ sub_category }}</span>
                     {% endfor %}
                 </p>
-                <a href="{{ paper.url }}" class="card-link" target="_blank">Read
-                    more</a>
-                <span
-                    class="favorite-icon {% if paper.is_favorite %}favorited{% endif %} position-absolute"
-                    data-paper-id="{{ paper.id }}">&#9733;</span>
+                <a href="{{ paper.url }}" class="card-link" target="_blank">Read more</a>
+                <span class="favorite-icon favorited" data-paper-id="{{ paper.id }}">&#9733;</span>
             </div>
         </div>
     </div>

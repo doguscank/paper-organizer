@@ -1,3 +1,4 @@
+import logging
 import os
 import sqlite3
 
@@ -13,6 +14,7 @@ os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
 load_dotenv()
 
 app = Flask(__name__)
+logging.basicConfig(level=logging.DEBUG)
 
 
 def get_db():
@@ -39,11 +41,13 @@ def index():
 @app.route("/add_papers", methods=["GET", "POST"])
 def add_papers():
     if request.method == "POST":
-        arxiv_ids = request.form.get("arxiv_ids", "").split(",")
-        if not arxiv_ids:
-            return jsonify({"error": "No arxiv_ids provided"}), 400
+        paper_ids = request.form.getlist("paper_ids")
+        logging.debug(f"Received paper_ids: {paper_ids}")
+        if not paper_ids:
+            logging.error("No paper_ids provided")
+            return jsonify({"error": "No paper_ids provided"}), 400
 
-        papers = get_categorized_papers_from_ids(arxiv_ids)
+        papers = get_categorized_papers_from_ids(paper_ids)
         db = get_db()
         db.add_data(papers)
         return redirect(url_for("index"))
@@ -71,17 +75,40 @@ def query():
             query_text=query_text,
             results=[
                 {
+                    "id": x.id,
                     "title": x.title,
                     "authors": x.authors,
                     "url": x.url,
                     "summary": x.summary,
                     "category": x.category,
                     "sub_categories": x.sub_categories,
+                    "is_favorite": db.is_favorite(x.id),
                 }
                 for x in result_papers
             ],
         )
-    return render_template("query.html")
+    return render_template("query.html", results=[])
+
+
+@app.route("/favorites")
+def favorites():
+    db = get_db()
+    favorite_papers = db.get_favorite_papers()
+    return render_template("favorites.html", papers=favorite_papers)
+
+
+@app.route("/favorite/<int:paper_id>", methods=["POST"])
+def favorite(paper_id):
+    db = get_db()
+    db.add_favorite(paper_id)
+    return jsonify({"status": "success"})
+
+
+@app.route("/unfavorite/<int:paper_id>", methods=["POST"])
+def unfavorite(paper_id):
+    db = get_db()
+    db.remove_favorite(paper_id)
+    return jsonify({"status": "success"})
 
 
 if __name__ == "__main__":
