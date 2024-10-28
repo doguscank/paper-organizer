@@ -6,6 +6,7 @@ from dotenv import load_dotenv
 from flask import Flask, g, jsonify, redirect, render_template, request, url_for
 
 from categorizer import get_categorized_papers_from_ids
+from chat_with_pdf import ask_pdf
 from embedding_generator import generate_embedding
 from vector_db import VectorDB
 
@@ -14,7 +15,10 @@ os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
 load_dotenv()
 
 app = Flask(__name__)
-logging.basicConfig(level=logging.DEBUG)
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+)
+logging.getLogger().addHandler(logging.StreamHandler())
 
 
 def get_db():
@@ -42,7 +46,7 @@ def index():
 def add_papers():
     if request.method == "POST":
         paper_ids = request.form.getlist("paper_ids")
-        logging.debug(f"Received paper_ids: {paper_ids}")
+        logging.info(f"Received paper_ids: {paper_ids}")
         if not paper_ids:
             logging.error("No paper_ids provided")
             return jsonify({"error": "No paper_ids provided"}), 400
@@ -118,6 +122,33 @@ def view_paper(paper_id):
     if paper:
         return render_template("view_paper.html", paper=paper)
     return jsonify({"error": "Paper not found"}), 404
+
+
+@app.route("/chat_with_paper", methods=["POST"])
+def chat_with_paper():
+    data = request.get_json()
+    paper_id = data.get("paper_id")
+    message = data.get("message")
+
+    logging.info(f"Received data: {data}")
+    logging.info(f"paper_id: {paper_id}")
+    logging.info(f"message: {message}")
+
+    if not paper_id or not message:
+        return jsonify({"error": "Invalid input"}), 400
+
+    db = get_db()
+    paper = db.get_paper_by_id(paper_id)
+    if not paper:
+        return jsonify({"error": "Paper not found"}), 404
+
+    # Interact with the LLM to get a response based on the paper content
+    response = ask_pdf(paper, message)
+
+    logging.info(f"User message: {message}")
+    logging.info(f"LLM response: {response}")
+
+    return jsonify({"response": response})
 
 
 if __name__ == "__main__":

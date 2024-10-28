@@ -1,17 +1,73 @@
 {% extends "base.html" %}
 {% block content %}
-<h1>{{ paper.title }}</h1>
-<h6 class="text-muted">
-    {% for author in paper.authors %}
-    <span class="badge badge-secondary">{{ author }}</span>
-    {% endfor %}
-</h6>
-<p><strong>Category:</strong> {{ paper.category }}</p>
-<p><strong>Sub Categories:</strong>
-    {% for sub_category in paper.sub_categories %}
-    <span class="badge badge-info rounded-pill">{{ sub_category }}</span>
-    {% endfor %}
-</p>
-<iframe src="{{ paper.url }}" width="100%"
-    height="600px"></iframe>
+<div class="row">
+    <div class="col-md-8">
+        <h1>{{ paper.title }}</h1>
+        <h6 class="text-muted">
+            {% for author in paper.authors %}
+            <span class="badge badge-secondary">{{ author }}</span>
+            {% endfor %}
+        </h6>
+        <p><strong>Category:</strong> {{ paper.category }}</p>
+        <p><strong>Sub Categories:</strong>
+            {% for sub_category in paper.sub_categories %}
+            <span class="badge badge-info rounded-pill">{{ sub_category
+                }}</span>
+            {% endfor %}
+        </p>
+        <iframe src="{{ paper.url }}" width="100%"
+            height="600px"></iframe>
+    </div>
+    <div class="col-md-4">
+        <h2>Chat with Paper</h2>
+        <div id="chat-box" class="border p-3 mb-3"
+            style="height: 400px; overflow-y: scroll;">
+            <!-- Chat messages will be appended here -->
+        </div>
+        <div class="input-group">
+            <input type="text" id="chat-input" class="form-control"
+                placeholder="Ask something about the paper...">
+            <div class="input-group-append">
+                <button class="btn btn-primary" id="send-btn">Send</button>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        document.getElementById("send-btn").addEventListener("click", function() {
+            var message = document.getElementById("chat-input").value;
+            if (message.trim() === "") return;
+
+            // Append user message to chat box
+            var chatBox = document.getElementById("chat-box");
+            var userMessage = document.createElement("div");
+            userMessage.className = "text-right";
+            userMessage.innerHTML = "<strong>You:</strong> " + message;
+            chatBox.appendChild(userMessage);
+
+            // Clear input
+            document.getElementById("chat-input").value = "";
+
+            // Send message to server
+            fetch("/chat_with_paper", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ paper_id: {{ paper.id }}, message: message })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.response) {
+                    // Append LLM response to chat box
+                    var llmMessage = document.createElement("div");
+                    llmMessage.className = "text-left";
+                    llmMessage.innerHTML = "<strong>LLM:</strong> " + data.response;
+                    chatBox.appendChild(llmMessage);
+                }
+            });
+        });
+    });
+</script>
 {% endblock %}

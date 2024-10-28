@@ -13,6 +13,7 @@ __pycache__/
 *.sqlite3
 *.db
 *.faiss
+pdfs/
 
 # Distribution / packaging
 .Python

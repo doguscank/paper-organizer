@@ -1,11 +1,57 @@
 import numpy as np
 from transformers import AutoModel, AutoTokenizer
 
-TOKENIZER = AutoTokenizer.from_pretrained("allenai/scibert_scivocab_uncased")
-MODEL = AutoModel.from_pretrained("allenai/scibert_scivocab_uncased")
+SCIBERT_TOKENIZER = AutoTokenizer.from_pretrained("allenai/scibert_scivocab_uncased")
+SCIBERT_MODEL = AutoModel.from_pretrained("allenai/scibert_scivocab_uncased")
 
 
-def get_tokenizer() -> AutoTokenizer:
+def normalize_vector_L2(vector: np.ndarray) -> np.ndarray:
+    """
+    Normalize the input vector using L2 normalization.
+
+    Parameters
+    ----------
+    vector : np.ndarray
+        The input vector to normalize.
+
+    Returns
+    -------
+    np.ndarray
+        The normalized vector.
+    """
+
+    norm = np.linalg.norm(vector, ord=2)
+    normalized_vector = vector / norm
+
+    return normalized_vector
+
+
+def find_distance_L2(
+    vector1: np.ndarray,
+    vector2: np.ndarray,
+) -> float:
+    """
+    Find the L2 distance between two input vectors.
+
+    Parameters
+    ----------
+    vector1 : np.ndarray
+        The first input vector.
+    vector2 : np.ndarray
+        The second input vector.
+
+    Returns
+    -------
+    float
+        The L2 distance between the two input vectors.
+    """
+
+    distance = np.linalg.norm(vector1 - vector2, ord=2)
+
+    return distance
+
+
+def get_scibert_tokenizer() -> AutoTokenizer:
     """
     Returns the SciBERT tokenizer from the Hugging Face Transformers library.
 
@@ -19,10 +65,10 @@ def get_tokenizer() -> AutoTokenizer:
         The SciBERT tokenizer.
     """
 
-    return TOKENIZER
+    return SCIBERT_TOKENIZER
 
 
-def get_model() -> AutoModel:
+def get_scibert_model() -> AutoModel:
     """
     Returns the SciBERT model from the Hugging Face Transformers library.
 
@@ -36,10 +82,13 @@ def get_model() -> AutoModel:
         The SciBERT model.
     """
 
-    return MODEL
+    return SCIBERT_MODEL
 
 
-def generate_embedding(text: str) -> np.ndarray:
+def generate_embedding(
+    text: str,
+    normalize: bool = False,
+) -> np.ndarray:
     """
     Generate the embedding of the given text using the SciBERT model.
 
@@ -47,6 +96,8 @@ def generate_embedding(text: str) -> np.ndarray:
     ----------
     text : str
         The text to generate the embedding for.
+    normalize : bool, optional
+        Whether to normalize the embedding, by default False.
 
     Returns
     -------
@@ -54,17 +105,23 @@ def generate_embedding(text: str) -> np.ndarray:
         The embedding of the text.
     """
 
-    model = get_model()
-    tokenizer = get_tokenizer()
+    model = get_scibert_model()
+    tokenizer = get_scibert_tokenizer()
 
-    inputs = tokenizer(text.lower(), return_tensors="pt")
+    inputs = tokenizer(text.lower(), return_tensors="pt", padding=True, truncation=True)
     outputs = model(**inputs)
     embeddings = outputs.last_hidden_state.mean(dim=1).detach().numpy()
+
+    if normalize:
+        embeddings = normalize_vector_L2(embeddings)
 
     return embeddings
 
 
-def generate_embeddings(texts: list[str]) -> dict[str, np.ndarray]:
+def generate_embeddings(
+    texts: list[str],
+    normalize: bool = False,
+) -> dict[str, np.ndarray]:
     """
     Generate the embeddings of the given texts using the SciBERT model.
 
@@ -72,6 +129,8 @@ def generate_embeddings(texts: list[str]) -> dict[str, np.ndarray]:
     ----------
     texts : list[str]
         The list of texts to generate the embeddings for.
+    normalize : bool, optional
+        Whether to normalize the embeddings, by default False.
 
     Returns
     -------
@@ -79,15 +138,21 @@ def generate_embeddings(texts: list[str]) -> dict[str, np.ndarray]:
         A dictionary containing the embeddings of the texts.
     """
 
-    model = get_model()
-    tokenizer = get_tokenizer()
+    model = get_scibert_model()
+    tokenizer = get_scibert_tokenizer()
 
     embeddings = {}
 
     for text in texts:
-        inputs = tokenizer(text.lower(), return_tensors="pt")
+        inputs = tokenizer(
+            text.lower(), return_tensors="pt", padding=True, truncation=True
+        )
         outputs = model(**inputs)
         embedding = outputs.last_hidden_state.mean(dim=1).detach().numpy()
+
+        if normalize:
+            embedding = normalize_vector_L2(embedding)
+
         embeddings[text] = embedding
 
     return embeddings

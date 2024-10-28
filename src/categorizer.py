@@ -20,6 +20,8 @@ def get_categories_and_subcategories(
     ----------
     summary : str
         The summary of the paper.
+    client : Optional[Groq], optional
+        The Groq client to use, by default None.
 
     Returns
     -------
