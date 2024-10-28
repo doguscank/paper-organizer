@@ -42,8 +42,8 @@
                         }}</span>
                     {% endfor %}
                 </p>
-                <a href="{{ result.url }}" class="card-link"
-                    target="_blank">Read more</a>
+                <a href="{{ url_for('view_paper', paper_id=result.id) }}"
+                    class="card-link" target="_blank">Read more</a>
                 <span
                     class="favorite-icon {% if result.is_favorite %}favorited{% endif %}"
                     data-paper-id="{{ result.id }}">&#9733;</span>
